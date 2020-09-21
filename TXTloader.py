@@ -1,3 +1,6 @@
+# TXTloader.py
+
+#import os
 import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog, QFileDialog, QApplication, QMainWindow
@@ -27,8 +30,7 @@ class MainWindow(QDialog):
 
 
     def LoadOk(self):
-        print(fname)
-        sys.exit()
+        QApplication.exit()
 
 
 app=QApplication(sys.argv)

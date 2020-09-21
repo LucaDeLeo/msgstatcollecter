@@ -1,6 +1,7 @@
 import datetime
+import TXTloader
 
-chat = open("demo.txt", "r", encoding="utf-8")
+chat = open(TXTloader.fname[0], "r", encoding="utf-8")
 
 
 dias = []
