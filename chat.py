@@ -1,4 +1,3 @@
-import re
 import datetime
 
 chat = open("demo.txt", "r", encoding="utf-8")
@@ -8,6 +7,7 @@ dias = []
 days_total = 0
 msgs_total = 0
 day_messages = 0
+users = {"System Messages": 0}
 
 for line in chat:
     part = line.partition(" - ")
@@ -15,6 +15,12 @@ for line in chat:
         date = datetime.datetime.strptime(part[0], "%m/%d/%y, %I:%M %p")
     except ValueError as err:
         continue
+
+    sender = part[2].partition(":")[0]
+    if '\n' not in sender:
+        users.update({sender: users.setdefault(sender, 0) + 1})
+    else:
+        users.update({"System Messages": users.get("System Messages") + 1})
 
     day = (date.year, date.month, date.day)
     msgs_total += 1
@@ -30,5 +36,6 @@ for line in chat:
 
 dias[-1][1] = day_messages
 
-
+print(users)
 print(msgs_total / len(dias))
+print(msgs_total)
