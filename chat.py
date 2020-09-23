@@ -7,8 +7,12 @@ plt.style.use('seaborn')
 
 chat = open(TXTloader.fname[0], "r", encoding="utf-8")
 
-dias2 = []
-hora2 = []
+
+#----Plot-messages-variables------
+daysPltMess = []
+hourPltMess = []
+#---------------------------------
+
 dias = []
 days_total = 0
 msgs_total = 0
