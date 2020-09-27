@@ -1,11 +1,12 @@
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import TXTloader
+#import TXTloader
 
 plt.style.use('seaborn')
 
-chat = open(TXTloader.fname[0], "r", encoding="utf-8")
+#chat = open(TXTloader.TXT[0], "r", encoding="utf-8")
+chat = open('demo.txt', "r", encoding="utf-8") 
 
 
 #----Plot-messages-variables------
@@ -49,18 +50,29 @@ for line in chat:
     hourPltMess.append(datetime.datetime(2000,1,1,date.hour,date.minute))
     #---------------------------------
 
-#----Plot-messages-------------
-fig, ax = plt.subplots()
-ax.plot(daysPltMess,hourPltMess,'.')
-fig.autofmt_xdate()
 
-ax.fmt_xdata = mdates.DateFormatter('%Y/%m/%d')
-ax.fmt_ydata = mdates.DateFormatter('%I:%M %p')
-plt.tight_layout()
-#plt.legend()
-plt.show()
+#----Plot-messages-------------
+def Plot_DayVsHour(day,hour):
+    fig, ax = plt.subplots()
+    ax.set(title="Daily messages")
+    ax.plot(day,hour,'.')
+    fig.autofmt_xdate()
+
+    ax.fmt_xdata = mdates.DateFormatter('%Y/%m/%d')
+    ax.fmt_ydata = mdates.DateFormatter('%I:%M %p')
+    plt.tight_layout()
+    ax.get_xaxis().set_major_formatter(mdates.DateFormatter('%Y/%m/%d'))
+    ax.get_yaxis().set_major_formatter(mdates.DateFormatter('%I:%M %p'))
+    plt.show()
+    #--------Cosas que quiero averiguar---------------    
+    #plt.setp(plt.gca().xaxis.get_majorticklabels(),    
+    #     'rotation', 45)                           
+    #plt.legend()    
+    #plt.gca().xaxis.set_major_locator(mdates.MonthLocator(None,1,5))
+    #plt.gca().yaxis.set_major_locator(mdates.HourLocator())    
 #------------------------------
 
+Plot_DayVsHour(daysPltMess,hourPltMess)
 
 
 dias[-1][1] = day_messages

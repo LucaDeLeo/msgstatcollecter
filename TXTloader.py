@@ -30,6 +30,8 @@ class MainWindow(QDialog):
 
 
     def LoadOk(self):
+        global TXT
+        TXT = fname
         QApplication.exit()
 
 
@@ -42,3 +44,4 @@ widget.setFixedWidth(400)
 widget.setFixedHeight(180)
 widget.show()
 app.exec_()
+
