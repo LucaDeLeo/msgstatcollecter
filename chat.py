@@ -1,12 +1,12 @@
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-#import TXTloader
+import TXTloader
 
 plt.style.use('seaborn')
 
-#chat = open(TXTloader.TXT[0], "r", encoding="utf-8")
-chat = open('demo.txt', "r", encoding="utf-8") 
+chat = open(TXTloader.TXT[0], "r", encoding="utf-8")
+#chat = open('demo.txt', "r", encoding="utf-8") 
 
 
 #----Plot-messages-variables------
