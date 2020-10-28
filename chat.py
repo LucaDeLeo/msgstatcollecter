@@ -12,7 +12,12 @@ chat = open(TXTloader.TXT[0], "r", encoding="utf-8")
 #----Plot-messages-variables------
 daysPltMess = []
 hourPltMess = []
+
+#----Messages-Per-Hour-variables--
+MessagesPerHour=[]
+HourMPH=[]
 #---------------------------------
+
 
 dias = []
 days_total = 0
@@ -45,12 +50,31 @@ for line in chat:
     else:
         day_messages += 1
 
+    #----------Messages-Per-Hour------------
+    hMPH = datetime.datetime(2000,1,1,date.hour)
+    if not(hMPH in HourMPH):
+        HourMPH.append(hMPH)
+        MessagesPerHour.append(0)
+    HourMPH = sorted(HourMPH)
+    MessagesPerHour[HourMPH.index(hMPH)] +=1
+
     #----Plot-messages-variables------
     daysPltMess.append(date.date())
     hourPltMess.append(datetime.datetime(2000,1,1,date.hour,date.minute))
     #---------------------------------
 
+#----Plot-Messages-Per-Day-----
 
+def Plot_MessagesPerHour(msg,hour):
+    fig, ax = plt.subplots()
+    ax.set(title="Messages Per hour")
+    ax.plot(hour,msg,'-o')
+    fig.autofmt_xdate()
+
+    ax.fmt_xdata = mdates.DateFormatter('%I %p')
+    plt.tight_layout()
+    ax.get_xaxis().set_major_formatter(mdates.DateFormatter('%I %p'))
+    plt.show()
 #----Plot-messages-------------
 def Plot_DayVsHour(day,hour):
     fig, ax = plt.subplots()
@@ -73,9 +97,9 @@ def Plot_DayVsHour(day,hour):
 #------------------------------
 
 Plot_DayVsHour(daysPltMess,hourPltMess)
+Plot_MessagesPerHour(MessagesPerHour,HourMPH)
+#dias[-1][1] = day_messages (no estoy seguro de haber borrado esto en algún momento)
 
-
-dias[-1][1] = day_messages
 
 #print(users)
 #print(msgs_total / len(dias))
