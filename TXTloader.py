@@ -1,3 +1,6 @@
+# TXTloader.py
+
+#import os
 import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog, QFileDialog, QApplication, QMainWindow
@@ -27,8 +30,9 @@ class MainWindow(QDialog):
 
 
     def LoadOk(self):
-        print(fname)
-        sys.exit()
+        global TXT
+        TXT = fname
+        QApplication.exit()
 
 
 app=QApplication(sys.argv)
@@ -40,3 +44,4 @@ widget.setFixedWidth(400)
 widget.setFixedHeight(180)
 widget.show()
 app.exec_()
+
