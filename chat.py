@@ -23,6 +23,10 @@ DayMO=[]
 
 #---------------------------------
 
+class user:
+    def __init__(self):
+        self.dias=0
+        self.
 
 dias = []
 days_total = 0
