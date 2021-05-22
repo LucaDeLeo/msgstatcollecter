@@ -1,6 +1,7 @@
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from plots_functions import *
 #import TXTloader
 
 plt.style.use('seaborn')
@@ -12,7 +13,7 @@ chat = open('demo.txt', "r", encoding="utf-8")
 #----Save-the-usernames-----------
 users = {"System Messages": [0]}
 #----Everyone-username------------
-users.update( {"Total": [0,[],[],[],[],[],[]] } )
+users.update( {"Total": [0,[],[],[],[],[],[],[]] } )
 
 
 #----Counting-Days-and-menssajes--
@@ -31,6 +32,8 @@ day_messages = 0
 #----Messages-Per-Hour-variables--Hora vs cantidad de mensajes
 #users[][5] Cantidad de mensajes mandados en cierta hora [6]
 #users[][6] La hora en la que se mandan mensajes de [5]
+#---Words-per-text------------
+#users[][7] La cantidad de palabras por linea para cada usuario
 #---------------------------------
 
 
@@ -44,7 +47,7 @@ for line in chat:
     #--------Save-the-usersnames-and-count-messages
     sender = part[2].partition(":")[0]
     if '\n' not in sender:
-        users.update({sender: users.setdefault(sender, [0,[],[],[],[],[],[]])})
+        users.update({sender: users.setdefault(sender, [0,[],[],[],[],[],[],[]])})
         users[sender][0] = users[sender][0] + 1
     else:
         users.update({"System Messages": users.get("System Messages")[0] + 1})
@@ -100,151 +103,14 @@ for line in chat:
     users["Total"][6] = sorted(users["Total"][6])
     users["Total"][5][users["Total"][6].index(hMPH)] += 1
 
+    #---------Words-per-text------------- -
+    if '\n' not in sender:
+        WordsText=part[2].partition(":")[2]
+        Words=WordsText.split()
+        WPT=len(Words)
+        users[sender][7].append(WPT)
+        users["Total"][7].append(WPT)
     #---------------------------------------
-
-
-#----Plot-Total-Messages-Overtime
-
-def Plot_TotalMessagesOvertime(users,graphs=[0]):
-    # Podes elegir cuales y cuantos graficos queres con graphs, de 1 en adelante
-
-    key = 0
-
-    for num,usr in enumerate(users):
-
-
-        if graphs == [0] or key == 1:
-            graphs = [num]
-            key = 1
-        if num in graphs and num != 0:
-
-            days1 = users[usr][1]
-            msg   = users[usr][2]
-
-            l = (days1[-1]-days1[0]).days
-            e = 11*l/(51*10)
-            s = l/(51*10)
-            b = e-s
-            br = round(b,0)
-            if s < 1:
-                s = 0
-            sr = round(s,0)
-            br2 = round(b/2,0)
-            cota = 0
-            msg2 = []
-            days2 = []
-            msg3 = []
-            days3 = []
-
-            for i in range(l):
-                daycomp=days1[0]+datetime.timedelta(days=i)
-                cota+=1
-                if daycomp in days1:
-                    msg2.append(msg[days1.index(daycomp)])
-                else:
-                    msg2.append(0)
-                if cota==br+sr:
-                    suma=0
-                    for j in range(cota):
-                        suma=suma+msg2[i-j]
-
-                    days3.append(days1[0]+datetime.timedelta(days=i-br2))
-                    msg3.append(suma/cota)
-                    cota=0
-
-            fig, ax =plt.subplots()
-            ax.set(title="Total Messages Overtime "+ usr)
-            ax.bar(days3,msg3,width=datetime.timedelta(days=br))
-            fig.autofmt_xdate()
-
-            ax.fmt_xdata =mdates.DateFormatter('%Y/%m/%d')
-            #plt.tight_layout()
-            ax.get_xaxis().set_major_formatter(mdates.DateFormatter('%Y/%m/%d'))
-    plt.show()
-
-#----Plot-Messages-Overtime----
-
-def Plot_MessagesOvertime(users,graphs=[0]):#(msg,days):
-
-
-    key = 0
-    for num,usr in enumerate(users):
-
-        if graphs == [0] or key == 1:
-            key = 1
-            graphs = [num]
-        if num in graphs and num != 0:
-            days=users[usr][1]
-            msg=users[usr][2]
-
-            fig, ax =plt.subplots()
-            ax.set(title="Messages Overtime "+ usr)
-            ax.set_xlim(days[-1]-datetime.timedelta(days=183),days[-1])
-            ax.stackplot(days,msg)
-            fig.autofmt_xdate()
-
-            ax.fmt_xdata =mdates.DateFormatter('%Y/%m/%d')
-            #plt.tight_layout()
-            ax.get_xaxis().set_major_formatter(mdates.DateFormatter('%Y/%m/%d'))
-    plt.show()
-
-#----Plot-messages-------------
-def Plot_DayVsHour(users,graphs=[0]):
-    key = 0
-    for num,usr in enumerate(users):
-
-        if graphs == [0] or key == 1:
-            graphs = [num]
-            key = 1
-
-        if num in graphs and num != 0:
-            day=users[usr][3]
-            hour=users[usr][4]
-
-            fig, ax = plt.subplots()
-            ax.set(title="Daily messages "+ usr)
-            ax.plot(day,hour,'.')
-            fig.autofmt_xdate()
-
-            ax.fmt_xdata = mdates.DateFormatter('%Y/%m/%d')
-            ax.fmt_ydata = mdates.DateFormatter('%I:%M %p')
-            plt.tight_layout()
-            ax.get_xaxis().set_major_formatter(mdates.DateFormatter('%Y/%m/%d'))
-            ax.get_yaxis().set_major_formatter(mdates.DateFormatter('%I:%M %p'))
-    plt.show()
-    #--------Cosas que quiero averiguar---------------    
-    #plt.setp(plt.gca().xaxis.get_majorticklabels(),    
-    #     'rotation', 45)                           
-    #plt.legend()    
-    #plt.gca().xaxis.set_major_locator(mdates.MonthLocator(None,1,5))
-    #plt.gca().yaxis.set_major_locator(mdates.HourLocator())    
-
-#----Plot-Messages-Per-Hour----
-
-def Plot_MessagesPerHour(users,graphs=[0]):
-
-    key = 0
-    for num,usr in enumerate(users):
-
-        if graphs == [0] or key == 1:
-            graphs = [num]
-            key = 1
-
-        if num in graphs and num != 0:
-            hour=users[usr][6]
-            msg=users[usr][5]
-
-            fig, ax = plt.subplots()
-            ax.set(title="Messages Per hour "+ usr)
-            ax.plot(hour,msg,'-o')
-            fig.autofmt_xdate()
-
-            ax.fmt_xdata = mdates.DateFormatter('%I %p')
-            plt.tight_layout()
-            ax.get_xaxis().set_major_formatter(mdates.DateFormatter('%I %p'))
-    plt.show()
-#------------------------------
-
 
 #Plot_TotalMessagesOvertime(users,(1,3))
 
@@ -254,9 +120,9 @@ def Plot_MessagesPerHour(users,graphs=[0]):
 
 #Plot_MessagesPerHour(users,(1,3))
 
+#Plot_PiePorsentage(users,msgs_total)
 
-#print(users["Luca"][0])
-#print(users["Kenneth"][0])
+#Plot_WordsPerText(users)
 
 #print(msgs_total / len(dias))
 #print(msgs_total)
