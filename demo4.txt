@@ -1,0 +1,27 @@
+In physics (specifically in electromagnetism) the Lorentz force
+(or electromagnetic force) is the combination of electric and magnetic force
+on a point charge due to electromagnetic fields. A particle of charge q
+moving with a velocity v in an electric field E and a magnetic field B
+experiences a force of
+
+    F = q E + q v × B
+
+(in SI units). It says that the electromagnetic force on a charge q
+is a combination of a force in the direction of the electric field E
+proportional to the magnitude of the field and the quantity of charge,
+and a force at right angles to the magnetic field B and the velocity v of 
+the charge, proportional to the magnitude of the field, the charge, and the 
+velocity. Variations on this basic formula describe the magnetic force on 
+a current-carrying wire (sometimes called Laplace force), the
+electromotive force in a wire loop moving through a magnetic field 
+(an aspect of Faraday's law of induction), and the force on a moving 
+charged particle.
+
+Historians suggest that the law is implicit in a paper by James Clerk Maxwell, 
+published in 1865. Hendrik Lorentz arrived at a complete derivation in 
+1895, identifying the contribution of the electric force a few years 
+after Oliver Heaviside correctly identified the contribution of the magnetic 
+force.
+
+this text was extracted from:
+https://en.wikipedia.org/wiki/Lorentz_force

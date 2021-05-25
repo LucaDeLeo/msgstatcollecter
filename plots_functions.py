@@ -256,6 +256,36 @@ def Plot_WordsPerText(users,fig=0,ax=0):
         plt.show()
 
 
+def firstdate(part):
+    l=0
+    error=[]
+    for z in range(2):
+        if z == 0 and l==0:
+            try:
+                indate="%m/%d/%y, %I:%M %p"
+                fdate=datetime.datetime.strptime(part,indate)
+            except ValueError as err:
+                error.append(err)
+                continue
+            l=1
+
+        elif z == 1 and l==0:
+            try:
+                indate="%d/%m/%Y, %I:%M %p"
+                fdate=datetime.datetime.strptime(part,indate)
+            except ValueError as err:
+                error.append(err)
+                continue
+            l=1
+    if l == 1:
+        print("The (.txt) document time format is " +indate+ " , load successfully.")
+    else:
+        indate=""
+        print("This is not a WhatsApp (.txt) document or the (.txt) document time format has not yet been loaded.")
+    return(indate)
+
+
+
 def ColectInf(chat):
 
     #----Save-the-usernames-----------
@@ -281,11 +311,15 @@ def ColectInf(chat):
     #---Words-per-text------------
     #users[][7] La cantidad de palabras por linea para cada usuario
     #---------------------------------
-
+    keydate=0
     for line in chat:
         part = line.partition(" - ")
+
+        if keydate==0:
+            indate=firstdate(part[0])
+            keydate=1
         try:
-            date = datetime.datetime.strptime(part[0], "%m/%d/%y, %I:%M %p")
+            date = datetime.datetime.strptime(part[0], indate)
         except ValueError as err:
             continue
 
@@ -355,51 +389,54 @@ def ColectInf(chat):
             users[sender][7].append(WPT)
             users["Total"][7].append(WPT)
         #---------------------------------------
-    return(users)
+    return(users,len(indate))
 
 
 
 def msgStatCol(TXT):
 
     chat = open(TXT[0], "r", encoding="utf-8")
-    users=ColectInf(chat)
+    users, lenerror=ColectInf(chat)
 
-    #Plot_TotalMessagesOvertime(users,(2,3))
-    #Plot_MessagesOvertime(users,(1,3))
-    #Plot_DayVsHour(users,(2,3))
-    #Plot_MessagesPerHour(users,(1,3))
-    #Plot_PiePorsentage(users)
-    #Plot_WordsPerText(users)
-    #plt.show()
+    if lenerror != 0:
+        #Plot_TotalMessagesOvertime(users,(2,3))
+        #Plot_MessagesOvertime(users,(1,3))
+        #Plot_DayVsHour(users,(2,3))
+        #Plot_MessagesPerHour(users,(1,3))
+        #Plot_PiePorsentage(users)
+        #Plot_WordsPerText(users)
+        #plt.show()
 
-    fig= plt.figure()
+        fig= plt.figure()
 
-    ax0=plt.subplot2grid((6,8),(0,0),1,2)
-    ax1=plt.subplot2grid((6,8),(0,2),1,6)
-    ax2= plt.subplot2grid((6,8),(1,0),2,3)
-    ax3= plt.subplot2grid((6,8),(1,3),2,5)
-    ax4= plt.subplot2grid((6,8),(3,0),3,3)
-    ax5= plt.subplot2grid((6,8),(3,3),3,5)
+        ax0=plt.subplot2grid((6,8),(0,0),1,2)
+        ax1=plt.subplot2grid((6,8),(0,2),1,6)
+        ax2= plt.subplot2grid((6,8),(1,0),2,3)
+        ax3= plt.subplot2grid((6,8),(1,3),2,5)
+        ax4= plt.subplot2grid((6,8),(3,0),3,3)
+        ax5= plt.subplot2grid((6,8),(3,3),3,5)
 
-    plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=2.0)
+        plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=2.0)
 
-    Plot_WordsPerText(users,fig,ax0)
-    Plot_TotalMessagesOvertime(users,(2,3),fig,ax1)
-    Plot_MessagesPerHour(users,(2,3),fig,ax2)
-    Plot_MessagesOvertime(users,(2,3),fig,ax3)
-    Plot_PiePorsentage(users,fig,ax4)
-    Plot_DayVsHour(users,(2,3),fig,ax5)
+        Plot_WordsPerText(users,fig,ax0)
+        Plot_TotalMessagesOvertime(users,(2,3),fig,ax1)
+        Plot_MessagesPerHour(users,(2,3),fig,ax2)
+        Plot_MessagesOvertime(users,(2,3),fig,ax3)
+        Plot_PiePorsentage(users,fig,ax4)
+        Plot_DayVsHour(users,(2,3),fig,ax5)
 
-    ax0.tick_params(labelbottom=True)
-    ax1.tick_params(labelbottom=True)
-    ax2.tick_params(labelbottom=True)
-    ax3.tick_params(labelbottom=True)
-    ax4.tick_params(labelbottom=True)
-    ax5.tick_params(labelbottom=True)
+        ax0.tick_params(labelbottom=True)
+        ax1.tick_params(labelbottom=True)
+        ax2.tick_params(labelbottom=True)
+        ax3.tick_params(labelbottom=True)
+        ax4.tick_params(labelbottom=True)
+        ax5.tick_params(labelbottom=True)
 
-    plt.subplots_adjust(top=0.88)
-    plt.show()
+        plt.subplots_adjust(top=0.88)
+        plt.show()
 
+    else:
+        print("Try with other txt file.")
 
 
 
