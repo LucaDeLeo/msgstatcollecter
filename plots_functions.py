@@ -26,8 +26,8 @@ def Plot_TotalMessagesOvertime(users,graphs=[0],fig=0,ax=0):
         if num in graphs and num != 0:
             usrlabels.append(usr)
 
-            days1 = users[usr][1]
-            msg   = users[usr][2]
+            days1 = users[usr]["DaysMO"]
+            msg   = users[usr]["MessagesMO"]
 
             l = (days1[-1]-days1[0]).days
             e = 11*l/(51*10)
@@ -91,15 +91,13 @@ def Plot_MessagesOvertime(users,graphs=[0],fig=0,ax=0):#(msg,days):
         if num in graphs and num != 0:
             usrlabels.append(usr)
 
-            days=users[usr][1]
-            msg=users[usr][2]
+            days=users[usr]["DaysMO"]
+            msg=users[usr]["MessagesMO"]
             ax.set_xlim(days[-1]-datetime.timedelta(days=183),days[-1])
             plot=ax.stackplot(days,msg)
-            #ax.set_label([usr])
             fig.autofmt_xdate()
 
             ax.fmt_xdata =mdates.DateFormatter('%Y/%m/%d')
-            #plt.tight_layout()
 
             ax.get_xaxis().set_major_formatter(mdates.DateFormatter('%Y/%m/%d'))
     ax.set_title("Messages Over Time")
@@ -124,8 +122,8 @@ def Plot_DayVsHour(users,graphs=[0],fig=0,ax=0):
         if num in graphs and num != 0:
             usrlabels.append(usr)
 
-            day=users[usr][3]
-            hour=users[usr][4]
+            day=users[usr]["DaysPM"]
+            hour=users[usr]["HourPM"]
 
             ax.plot(day,hour,'.')
             fig.autofmt_xdate()
@@ -159,8 +157,8 @@ def Plot_MessagesPerHour(users,graphs=[0],fig=0,ax=0):
 
         if num in graphs and num != 0:
             usrlabels.append(usr)
-            hour=users[usr][6]
-            msg=users[usr][5]
+            hour=users[usr]["HourMPH"]
+            msg=users[usr]["MessagesMPH"]
 
             ax.plot(hour,msg,'-o')
             fig.autofmt_xdate()
@@ -183,7 +181,7 @@ def Plot_PiePorsentage(users,fig=0,ax=0):
     usrval=[]
     for num,usr in enumerate(users):
         if num!=0 and num!=1:
-            x=users[usr][0]*100/users["Total"][0]
+            x=users[usr]["CountMess"]*100/users["Total"]["CountMess"]
             vals.append(x)
             usrval.append(usr)
 
@@ -216,7 +214,7 @@ def Plot_WordsPerText(users,fig=0,ax=0):
     usrval=[]
     for num,usr in enumerate(users):
         if num!=0 and num!=1:
-            x=np.mean(users[usr][7])
+            x=np.mean(users[usr]["WordsPerText"])
             vals.append(x)
             usrval.append(usr)
 
@@ -257,32 +255,24 @@ def Plot_WordsPerText(users,fig=0,ax=0):
 
 
 def firstdate(part):
-    l=0
-    error=[]
-    for z in range(2):
-        if z == 0 and l==0:
-            try:
-                indate="%m/%d/%y, %I:%M %p"
-                fdate=datetime.datetime.strptime(part,indate)
-            except ValueError as err:
-                error.append(err)
-                continue
-            l=1
+    date_format=None
+    date_formats=["%d/%m/%Y, %I:%M %p","%m/%d/%y, %I:%M %p"]
 
-        elif z == 1 and l==0:
+    for df in date_formats:
+        if date_format==None:
             try:
-                indate="%d/%m/%Y, %I:%M %p"
-                fdate=datetime.datetime.strptime(part,indate)
-            except ValueError as err:
-                error.append(err)
+                fdate=datetime.datetime.strptime(part,df)
+            except ValueError:
                 continue
             l=1
+            date_format=df
+
     if l == 1:
-        print("The (.txt) document time format is " +indate+ " , load successfully.")
+        print("The (.txt) document time format is " +date_format+ " , load successfully.")
     else:
-        indate=""
+        date_format=""
         print("This is not a WhatsApp (.txt) document or the (.txt) document time format has not yet been loaded.")
-    return(indate)
+    return(date_format)
 
 
 
@@ -291,26 +281,25 @@ def ColectInf(chat):
     #----Save-the-usernames-----------
     users = {"System Messages": [0]}
     #----Everyone-username------------
-    users.update( {"Total": [0,[],[],[],[],[],[],[]] } )
+
+    # Add all the variables that are going to be
+    # used in a dictionary.
+    users.update( {"Total": {"CountMess": 0,
+                             "DaysMO":[],
+                             "MessagesMO":[],
+                             "DaysPM":[],
+                             "HourPM":[],
+                             "MessagesMPH":[],
+                             "HourMPH":[],
+                             "WordsPerText":[] }})
 
     #----Counting-Days-and-menssajes--
     dias = []
     days_total = 0
     msgs_total = 0
     day_messages = 0
-
-    #----Messages-Overtime------------Dias vs cantidad de mensajes
-    #users[][1] Dias en el que se cuentan la cantidad de mensajes users[][2]
-    #users[][2] Cantidad de mensajes para cada dia en users[][1]
-    #----Plot-messages-variables------Dias vs Horario
-    #users[][3] Dias en los que se mandaron mensajes
-    #users[][4] Horario en el que se mando un mensaje
-    #----Messages-Per-Hour-variables--Hora vs cantidad de mensajes
-    #users[][5] Cantidad de mensajes mandados en cierta hora [6]
-    #users[][6] La hora en la que se mandan mensajes de [5]
-    #---Words-per-text------------
-    #users[][7] La cantidad de palabras por linea para cada usuario
     #---------------------------------
+
     keydate=0
     for line in chat:
         part = line.partition(" - ")
@@ -325,15 +314,26 @@ def ColectInf(chat):
 
         #--------Save-the-usersnames-and-count-messages
         sender = part[2].partition(":")[0]
+
         if '\n' not in sender:
-            users.update({sender: users.setdefault(sender, [0,[],[],[],[],[],[],[]])})
-            users[sender][0] = users[sender][0] + 1
+            # Repeat the proceses done with the total massages. 
+            users.update({sender: users.setdefault(sender, {"CountMess": 0,
+                                                            "DaysMO":[],
+                                                            "MessagesMO":[],
+                                                            "DaysPM":[],
+                                                            "HourPM":[],
+                                                            "MessagesMPH":[],
+                                                            "HourMPH":[],
+                                                            "WordsPerText":[]
+                                                            })})
+
+            users[sender]["CountMess"] = users[sender]["CountMess"] + 1
         else:
             users.update({"System Messages": users.get("System Messages")[0] + 1})
 
         #---------Counting-Days-----------------
         day = (date.year, date.month, date.day)
-        users["Total"][0] += 1
+        users["Total"]["CountMess"] += 1
         if not dias:
             dias.append([day,0])
         if dias[-1][0] != day:
@@ -345,50 +345,61 @@ def ColectInf(chat):
             day_messages += 1
 
         #----------Messages-Overtime------------
+        # "DaysMO": Dias en el que se cuentan la cantidad de mensajes "MessagesMO"
+        # "MessagesMO": Cantidad de mensajes para cada dia en "DaysMO"
+
         DMO = date.date()
         if '\n' not in sender:
-            if not(DMO in users[sender][1]):
-                users[sender][1].append(DMO)
-                users[sender][2].append(0)
-            users[sender][2][users[sender][1].index(DMO)] += 1
+            if not(DMO in users[sender]["DaysMO"]):
+                users[sender]["DaysMO"].append(DMO)
+                users[sender]["MessagesMO"].append(0)
+            users[sender]["MessagesMO"][users[sender]["DaysMO"].index(DMO)] += 1
 
-        if not(DMO in users["Total"][1]):
-            users["Total"][1].append(DMO)
-            users["Total"][2].append(0)
-        users["Total"][2][users["Total"][1].index(DMO)] += 1
+        if not(DMO in users["Total"]["DaysMO"]):
+            users["Total"]["DaysMO"].append(DMO)
+            users["Total"]["MessagesMO"].append(0)
+        users["Total"]["MessagesMO"][users["Total"]["DaysMO"].index(DMO)] += 1
 
         #----Plot-messages-variables------
+        # DaysPM: Dias en los que se mandaron mensajes
+        # HourPM: Horario en el que se mando un mensaje
         if '\n' not in sender:
-            users[sender][3].append(date.date())
-            users[sender][4].append(datetime.datetime(2000,1,1,date.hour,date.minute))
+            users[sender]["DaysPM"].append(date.date())
+            users[sender]["HourPM"].append(datetime.datetime(2000,1,1,date.hour,date.minute))
 
-        users["Total"][3].append(date.date())
-        users["Total"][4].append(datetime.datetime(2000,1,1,date.hour,date.minute))
+        users["Total"]["DaysPM"].append(date.date())
+        users["Total"]["HourPM"].append(datetime.datetime(2000,1,1,date.hour,date.minute))
 
         #----------Messages-Per-Hour------------
+        #"MessagesMPH": Cantidad de mensajes mandados en cierta hora "HourMPH"
+        #"HourMPH": La hora en la que se mandan mensajes de "MessagesMPH"
+
         hMPH = datetime.datetime(2000,1,1,date.hour)
 
         if '\n' not in sender:
-            if not(hMPH in users[sender][6]):
-                users[sender][6].append(hMPH)
-                users[sender][5].append(0)
-            users[sender][6] = sorted(users[sender][6])
-            users[sender][5][users[sender][6].index(hMPH)] += 1
+            if not(hMPH in users[sender]["HourMPH"]):
+                users[sender]["HourMPH"].append(hMPH)
+                users[sender]["MessagesMPH"].append(0)
+            users[sender]["HourMPH"] = sorted(users[sender]["HourMPH"])
+            users[sender]["MessagesMPH"][users[sender]["HourMPH"].index(hMPH)] += 1
 
-        if not(hMPH in users["Total"][6]):
-            users["Total"][6].append(hMPH)
-            users["Total"][5].append(0)
-        users["Total"][6] = sorted(users["Total"][6])
-        users["Total"][5][users["Total"][6].index(hMPH)] += 1
+        if not(hMPH in users["Total"]["HourMPH"]):
+            users["Total"]["HourMPH"].append(hMPH)
+            users["Total"]["MessagesMPH"].append(0)
+        users["Total"]["HourMPH"] = sorted(users["Total"]["HourMPH"])
+        users["Total"]["MessagesMPH"][users["Total"]["HourMPH"].index(hMPH)] += 1
 
         #---------Words-per-text------------- -
+        #"WordsPerText": La cantidad de palabras por linea para cada usuario
+
         if '\n' not in sender:
             WordsText=part[2].partition(":")[2]
             Words=WordsText.split()
             WPT=len(Words)
-            users[sender][7].append(WPT)
-            users["Total"][7].append(WPT)
+            users[sender]["WordsPerText"].append(WPT)
+            users["Total"]["WordsPerText"].append(WPT)
         #---------------------------------------
+    #print(Errors)
     return(users,len(indate))
 
 
@@ -399,13 +410,6 @@ def msgStatCol(TXT):
     users, lenerror=ColectInf(chat)
 
     if lenerror != 0:
-        #Plot_TotalMessagesOvertime(users,(2,3))
-        #Plot_MessagesOvertime(users,(1,3))
-        #Plot_DayVsHour(users,(2,3))
-        #Plot_MessagesPerHour(users,(1,3))
-        #Plot_PiePorsentage(users)
-        #Plot_WordsPerText(users)
-        #plt.show()
 
         fig= plt.figure()
 
@@ -443,13 +447,19 @@ def msgStatCol(TXT):
 
 
 
+if __name__ == '__main__':
 
+    chat = open('demo.txt', "r", encoding="utf-8")
 
+    users, lenerror=ColectInf(chat)
 
-
-
-
-
+    #Plot_TotalMessagesOvertime(users,(2,3))
+    #Plot_MessagesOvertime(users,(1,3))
+    Plot_DayVsHour(users,(2,3))
+    #Plot_MessagesPerHour(users,(2,3))
+    #Plot_PiePorsentage(users)
+    #Plot_WordsPerText(users)
+    #plt.show()
 
 
 
